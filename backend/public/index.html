@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulation épidémique — application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">🦠</span>
+      <div>
+        <p class="brand-title">Épidémie&nbsp;— OpenMP</p>
+        <p class="brand-sub">backend C · PostgreSQL</p>
+      </div>
+    </div>
+
+    <button id="btnNewRun" class="btn-primary">+ Nouvelle simulation</button>
+
+    <div class="run-list-header">
+      <span>Historique</span>
+      <span id="runCount" class="run-count">—</span>
+    </div>
+    <div id="runList" class="run-list"></div>
+
+    <div class="health" id="health">vérification du serveur…</div>
+  </aside>
+
+  <main class="main">
+
+    <section id="formPanel" class="panel form-panel">
+      <h2>Paramètres de la simulation</h2>
+      <p class="hint">Les valeurs par défaut reproduisent une épidémie typique. Le
+        moteur C/OpenMP s'exécute côté serveur et écrit le résultat dans PostgreSQL.</p>
+
+      <form id="runForm" class="form-grid">
+        <label>Population (N)
+          <input type="number" name="population" value="6000" min="10" max="50000" required>
+        </label>
+        <label>Pas de temps
+          <input type="number" name="steps" value="200" min="1" max="2000" required>
+        </label>
+        <label>Threads OpenMP
+          <input type="number" name="threads" value="4" min="1" max="64" required>
+        </label>
+        <label>Taux de transmission β
+          <input type="number" name="beta" value="0.32" min="0" max="1" step="0.01" required>
+        </label>
+        <label>Guérison γ (infecté)
+          <input type="number" name="gammaInfecte" value="0.045" min="0" max="1" step="0.005" required>
+        </label>
+        <label>Guérison γ (isolé)
+          <input type="number" name="gammaIsole" value="0.08" min="0" max="1" step="0.005" required>
+        </label>
+        <label>Probabilité d'isolement / pas
+          <input type="number" name="isolationProb" value="0.09" min="0" max="1" step="0.01" required>
+        </label>
+        <label>Délai avant isolement (pas)
+          <input type="number" name="minDaysIsolation" value="2" min="0" max="60" required>
+        </label>
+        <label>Efficacité de l'isolement
+          <input type="number" name="isolationEffect" value="0.10" min="0" max="1" step="0.01" required>
+          <span class="field-note">1 = aucune réduction, 0 = contagion nulle</span>
+        </label>
+        <label>Mobilité
+          <input type="number" name="mobility" value="1.2" min="0" max="20" step="0.1" required>
+        </label>
+        <label>Rayon de contagion
+          <input type="number" name="radius" value="1.4" min="0.1" max="50" step="0.1" required>
+        </label>
+        <label>Infectés initiaux
+          <input type="number" name="initInfected" value="15" min="0" max="1000" required>
+        </label>
+        <label>Graine aléatoire
+          <input type="number" name="seed" value="42" required>
+          <span class="field-note">même graine + threads différents = résultat identique</span>
+        </label>
+
+        <button type="submit" class="btn-primary run-submit">Lancer la simulation</button>
+      </form>
+    </section>
+
+    <section id="resultPanel" class="panel result-panel hidden">
+      <div class="result-header">
+        <div>
+          <h2 id="resultTitle">Simulation</h2>
+          <p id="resultMeta" class="hint"></p>
+        </div>
+        <button id="btnDelete" class="btn-danger">Supprimer</button>
+      </div>
+
+      <div class="chart-box"><canvas id="chartCourbe"></canvas></div>
+      <div class="legend-row">
+        <span><span class="swatch" style="background:#2E86AB"></span>Sain</span>
+        <span><span class="swatch" style="background:#E63946"></span>Infecté</span>
+        <span><span class="swatch" style="background:#F4A261"></span>Isolé</span>
+        <span><span class="swatch" style="background:#2A9D8F"></span>Rétabli</span>
+      </div>
+
+      <div class="stats" id="resultStats"></div>
+    </section>
+
+    <div id="emptyState" class="panel empty-state hidden">
+      <p>Aucune simulation sélectionnée. Lancez-en une nouvelle ou choisissez-en
+        une dans l'historique à gauche.</p>
+    </div>
+
+  </main>
+</div>
+
+<script src="/vendor/chart.umd.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
